@@ -335,6 +335,16 @@
   // Simple parallax background
   let t = 0;
 
+  // --- Shelly toggle on score (best-effort, ignore errors)
+  function toggleShellyForGate(gateNumber){
+    // gate 1 -> 192.168.0.1, gate 2 -> 192.168.0.2, ...
+    const ip = `192.168.0.${gateNumber}`;
+    const url = `http://${ip}/relay/0/?turn=toggle`;
+
+    // no-cors: still sends even if Shelly doesn't allow CORS; we ignore failures
+    fetch(url, { mode: 'no-cors', cache: 'no-store' }).catch(() => {});
+  }
+
   function setState(s){
     state = s;
     if (s === STATE.READY){
@@ -713,6 +723,9 @@
           p.passed = true;
           score++;
           scoreText.textContent = String(score);
+
+          // NEW: toggle Shelly at 192.168.0.<score>
+          toggleShellyForGate(score);
         }
       }
 
